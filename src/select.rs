@@ -148,6 +148,10 @@ impl<'a, T> Select<'a, T> {
             };
             if self.filtering {
                 match self.term.read_key()? {
+                    Key::ArrowDown | Key::Char('j') => self.handle_down()?,
+                    Key::ArrowUp | Key::Char('k') => self.handle_up()?,
+                    Key::ArrowLeft | Key::Char('h') => self.handle_left()?,
+                    Key::ArrowRight | Key::Char('l') => self.handle_right()?,
                     Key::Enter => return enter(self),
                     Key::Escape => self.handle_stop_filtering(false)?,
                     Key::Backspace => self.handle_filter_backspace()?,
@@ -264,6 +268,7 @@ impl<'a, T> Select<'a, T> {
 
     fn handle_filter_key(&mut self, c: char) -> Result<(), io::Error> {
         self.filter.push(c);
+        self.cursor = 0;
         self.cur_page = 0;
         self.pages = self.get_pages();
         self.term.clear_to_end_of_screen()
@@ -271,6 +276,7 @@ impl<'a, T> Select<'a, T> {
 
     fn handle_filter_backspace(&mut self) -> Result<(), io::Error> {
         self.filter.pop();
+        self.cursor = 0;
         self.cur_page = 0;
         self.pages = self.get_pages();
         self.term.clear_to_end_of_screen()
